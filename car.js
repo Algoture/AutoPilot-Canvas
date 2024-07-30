@@ -6,11 +6,15 @@ class Car {
     this.acceleration = 0.9;
     this.width = width;
     this.friction = 0.05;
-    this.maxSpeed = 4;
+    this.maxSpeed = 3;
+    this.angle = 0;
     this.height = height;
     this.controls = new Controls();
   }
   update() {
+    this.#move();
+  }
+  #move() {
     // controls:
     if (this.controls.up) {
       this.speed += this.acceleration;
@@ -18,11 +22,14 @@ class Car {
     if (this.controls.down) {
       this.speed -= this.acceleration;
     }
-    if (this.controls.left) {
-      this.x -= 2;
-    }
-    if (this.controls.right) {
-      this.x += 2;
+    if (this.speed != 0) {
+      const flip = this.speed > 0 ? 1 : -1;
+      if (this.controls.left) {
+        this.angle += 0.02 * flip;
+      }
+      if (this.controls.right) {
+        this.angle -= 0.02 * flip;
+      }
     }
     // speed, acc, friction:
     if (this.speed > this.maxSpeed) {
@@ -37,17 +44,20 @@ class Car {
     if (this.speed < 0) {
       this.speed += this.friction;
     }
-    this.y -= this.speed;
+    if (Math.abs(this.speed) < this.friction) {
+      this.speed = 0;
+    }
+    this.x -= Math.sin(this.angle) * this.speed;
+    this.y -= Math.cos(this.angle) * this.speed;
   }
   draw(ctx) {
-    // ctx.fillStyle = "black";
+    ctx.fillStyle = "#004bff";
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(-this.angle);
     ctx.beginPath();
-    ctx.rect(
-      this.x - this.width / 2,
-      this.y - this.height / 2,
-      this.width,
-      this.height
-    );
+    ctx.rect(-this.width / 2, -this.height / 2, this.width, this.height);
     ctx.fill();
+    ctx.restore();
   }
 }
